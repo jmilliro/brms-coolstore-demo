@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 
 import org.drools.agent.KnowledgeAgent;
@@ -25,28 +26,29 @@ public class BRMSUtil {
 
 	private KnowledgeAgent kagent = null;
 
-	public BRMSUtil() {
+	public BRMSUtil() {		
+	}
+	
+	@PostConstruct
+	public void postConstruct() {
+	    kagent = KnowledgeAgentFactory.newKnowledgeAgent( "BRMS Agent");
+	    kagent.addEventListener(new LogKnowledgeAgentListener());
 
-		//System.out.println("BRMSUtil()");
-		
-		kagent = KnowledgeAgentFactory.newKnowledgeAgent( "BRMS Agent");
-		
-		ChangeSetImpl changeSet = new ChangeSetImpl();
-		changeSet.setResourcesAdded( buildResourceURLCollection() );
-				
-		// resource to the change-set xml for the resources to add                                                                  
-		kagent.applyChangeSet( changeSet );
-		
-		ResourceChangeScannerConfiguration changeScannerConfiguration = ResourceFactory.getResourceChangeScannerService().newResourceChangeScannerConfiguration();
-		
-		changeScannerConfiguration.setProperty("drools.resource.scanner.interval", Integer.toString(1));
+	    ChangeSetImpl changeSet = new ChangeSetImpl();
+	    changeSet.setResourcesAdded( buildResourceURLCollection() );
 
-		ResourceFactory.getResourceChangeScannerService().configure(changeScannerConfiguration); 
-		
-		ResourceFactory.getResourceChangeNotifierService().start();
+	    // resource to the change-set xml for the resources to add                                                                  
+	    kagent.applyChangeSet( changeSet );
 
-		ResourceFactory.getResourceChangeScannerService().start();
-		
+	    ResourceChangeScannerConfiguration changeScannerConfiguration = ResourceFactory.getResourceChangeScannerService().newResourceChangeScannerConfiguration();
+
+	    changeScannerConfiguration.setProperty("drools.resource.scanner.interval", Integer.toString(1));
+
+	    ResourceFactory.getResourceChangeScannerService().configure(changeScannerConfiguration); 
+
+	    ResourceFactory.getResourceChangeNotifierService().start();
+
+	    ResourceFactory.getResourceChangeScannerService().start();
 	}
 	
 	public StatelessKnowledgeSession getStatelessSession() {
